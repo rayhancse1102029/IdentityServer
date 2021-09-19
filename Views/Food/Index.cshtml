@@ -1,0 +1,42 @@
+﻿@using FoodMvc.Data.Entity
+
+@model IEnumerable<Food>
+
+@{
+    Layout = "_Layout";
+    int sl = 1;
+}
+
+<section>
+    <div class="container">
+        <table class="table table-bordered table-stripped">
+            <thead>
+                <tr>
+                    <th>#SL</th>
+                    <th>Name</th>
+                    <th>Food Type</th>
+                    <th>Color</th>
+                    <th>Weight</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@sl</td>
+                        <td>@item.Name</td>
+                        <td>@item.FoodType</td>
+                        <td>@item.Color</td>
+                        <td>@item.Weight</td>
+                        <td>
+                            <button class="btn btn-defult">View</button>
+                            <button class="btn btn-defult">Edit</button>
+                        </td>
+                    </tr>
+                    sl++;
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
