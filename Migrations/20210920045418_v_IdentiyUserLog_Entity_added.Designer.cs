@@ -4,14 +4,16 @@ using CARAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CARAPI.Migrations
 {
     [DbContext(typeof(CarApiDbContext))]
-    partial class CarApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210920045418_v_IdentiyUserLog_Entity_added")]
+    partial class v_IdentiyUserLog_Entity_added
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

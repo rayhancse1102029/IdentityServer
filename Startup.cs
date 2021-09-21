@@ -1,7 +1,8 @@
 using CARAPI.Data;
-using CARAPI.Handler;
 using CARAPI.Services.Car;
 using IdentityModel.Client;
+using IdentityServer4.Middleware;
+using IdentityServer4.Services.Jwt;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -17,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace CARAPI
@@ -35,8 +37,6 @@ namespace CARAPI
         {
 
             services.AddScoped<ICarService, CarService>();
-
-            services.AddHttpContextAccessor();
             services.AddControllers();
 
             #region Database Settings
@@ -46,7 +46,8 @@ namespace CARAPI
             #endregion
 
             #region Authorization
-
+            services.AddHttpContextAccessor();
+            services.AddSingleton<ITokenService, TokenService>();
             //new on but working only for token type Bearer
             services.AddAuthentication("Bearer")
               .AddJwtBearer("Bearer", options =>
@@ -57,15 +58,7 @@ namespace CARAPI
                       ValidateAudience = false
                   };
               });
-
-            services.AddSingleton<IDiscoveryCache>(r =>
-            {
-                var factory = r.GetRequiredService<IHttpClientFactory>();
-                return new DiscoveryCache("https://localhost:5000", () => factory.CreateClient());
-            });
-
-            services.AddTransient<ProtectedApiBearerTokenHandler>();
-
+            services.AddHttpClient();
             #endregion
 
             services.AddSwaggerGen(c =>
@@ -77,12 +70,17 @@ namespace CARAPI
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+            app.UseMiddleware<IdentityRequestMiddleware>();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CARAPI v1"));
             }
+
+            //app.UseMiddleware<ProtectedApiBearerTokenHandler>();
 
             app.UseHttpsRedirection();
             app.UseRouting();
