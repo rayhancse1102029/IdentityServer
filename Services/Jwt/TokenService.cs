@@ -3,6 +3,7 @@ using IdentityServer4.Data.Log;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -21,16 +22,19 @@ namespace IdentityServer4.Services.Jwt
     {
         private readonly IServiceScopeFactory scopeFactory;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly string IdentityServerBaseUrl = string.Empty;
 
-        public TokenService(IServiceScopeFactory scopeFactory, IHttpContextAccessor _httpContextAccessor)
+        public TokenService(IServiceScopeFactory scopeFactory, 
+            IHttpContextAccessor _httpContextAccessor,
+            IConfiguration _configuration)
         {
             this.scopeFactory = scopeFactory;
             this._httpContextAccessor = _httpContextAccessor;
+            IdentityServerBaseUrl = _configuration["IdentityServer4:Url"];
         }
 
         public JwtPayload GetJwtPayload(string token)
         {
-            var t = token;
             var handler = new JwtSecurityTokenHandler();
             var tokenData = handler.ReadJwtToken(token);
             return tokenData.Payload;
@@ -75,12 +79,12 @@ namespace IdentityServer4.Services.Jwt
                 StringContent httpContent = new StringContent(jsonObj, System.Text.Encoding.UTF8, "application/json");
 
                 var httpClient = new HttpClient();
-                var url = ("https://localhost:5000/Api/Log/LoginLogCredentials");
+                var url = IdentityServerBaseUrl + "/Api/Log/LoginLogCredentials";
                 var response = await httpClient.PostAsync(url, httpContent);
                 var stringContent = await response.Content.ReadAsStringAsync();
-                int resStatus = (int)JsonConvert.DeserializeObject(stringContent);
+                var resStatus = JsonConvert.DeserializeObject(stringContent);
 
-                if(resStatus == 0)
+                if(Convert.ToInt64(resStatus) == 0)
                 {
                     return false;
                 }

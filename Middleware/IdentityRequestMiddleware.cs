@@ -50,7 +50,9 @@ namespace IdentityServer4.Middleware
 
             string path = httpContext.Request.Path.Value;
 
-            if (path.ToLower() == "/swagger/index.html" || path.ToLower() == "/swagger/v1/swagger.json" || path.ToLower() == "/register" || path.ToLower() == "/login")
+            if (path.ToLower() == "/Api/Auth/Signin".ToLower() || path.ToLower() == "/Api/Auth/Signup".ToLower() 
+                || path.ToLower() == "/swagger/index.html".ToLower() || path.ToLower() == "/swagger/v1/swagger.json".ToLower() 
+                || path.ToLower() == "/register".ToLower() || path.ToLower() == "/login".ToLower())
             {
                 await _next(httpContext);
             }
@@ -73,7 +75,7 @@ namespace IdentityServer4.Middleware
                     if (!string.IsNullOrEmpty(client_id))
                     {
                         var httpClient = new HttpClient();
-                        var url = ("https://localhost:5000/Api/Auth/GetApplicationUserByUserName?username=" + client_id);
+                        var url = _config["IdentityServer4:Url"] + ("/Api/Auth/GetApplicationUserByUserName?username=" + client_id);
                         var response = await httpClient.GetAsync(url);
                         var stringContent = await response.Content.ReadAsStringAsync();
                         ApplicationUser user = JsonConvert.DeserializeObject<ApplicationUser>(stringContent);
@@ -96,7 +98,8 @@ namespace IdentityServer4.Middleware
                 {
                     httpContext.Response.ContentType = "text/plain";
                     httpContext.Response.StatusCode = 29; //UnAuthorized
-                    //httpContext.Response.Redirect("");
+                    await httpContext.Response.WriteAsync("Blocked");
+                    return;
                 }
             }
         }
